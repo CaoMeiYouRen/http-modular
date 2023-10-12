@@ -128,7 +128,7 @@ var vercel_default = {
   }
 };
 
-// node_modules/destr/dist/index.mjs
+// node_modules/.pnpm/destr@2.0.1/node_modules/destr/dist/index.mjs
 var suspectProtoRx = /"(?:_|\\u0{2}5[Ff]){2}(?:p|\\u0{2}70)(?:r|\\u0{2}72)(?:o|\\u0{2}6[Ff])(?:t|\\u0{2}74)(?:o|\\u0{2}6[Ff])(?:_|\\u0{2}5[Ff]){2}"\s*:/;
 var suspectConstructorRx = /"(?:c|\\u0063)(?:o|\\u006[Ff])(?:n|\\u006[Ee])(?:s|\\u0073)(?:t|\\u0074)(?:r|\\u0072)(?:u|\\u0075)(?:c|\\u0063)(?:t|\\u0074)(?:o|\\u006[Ff])(?:r|\\u0072)"\s*:/;
 var JsonSigRx = /^\s*["[{]|^\s*-?\d[\d.]{0,14}\s*$/;
@@ -196,7 +196,7 @@ function destr(value, options = {}) {
   }
 }
 
-// node_modules/defu/dist/defu.mjs
+// node_modules/.pnpm/defu@6.1.2/node_modules/defu/dist/defu.mjs
 function isObject(value) {
   return value !== null && typeof value === "object";
 }
@@ -251,7 +251,7 @@ var defuArrayFn = createDefu((object, key, currentValue) => {
   }
 });
 
-// node_modules/h3/dist/index.mjs
+// node_modules/.pnpm/h3@1.7.1/node_modules/h3/dist/index.mjs
 var H3Error = class extends Error {
   constructor() {
     super(...arguments);
@@ -517,7 +517,7 @@ var adapters = {
 };
 
 // src/modular.js
-var sourePrefix = `
+var sourcePrefix = `
 function makeRpc(url, func) {
   return async(...args) => {
     const ret = await fetch(url, {
@@ -529,16 +529,20 @@ function makeRpc(url, func) {
     });
     const type = ret.headers.get('content-type');
     if(type && type.startsWith('application/json')) {
-      return await ret.json();
+      return ret.json();
     } else if(type && type.startsWith('text/')) {
-      return await ret.text();
+      return ret.text();
+    } else if (type && type.startsWith('multipart/form-data')) {
+      return ret.formData();
+    } else if (type && type.startsWith('application/octet-stream')) {
+      return ret.blob();
     }
-    return await ret.arrayBuffer();
+    return ret.arrayBuffer();
   }
 }
 `;
 function buildModule(rpcs, url) {
-  let source = [sourePrefix];
+  let source = [sourcePrefix];
   for (const key of Object.keys(rpcs)) {
     source.push(`export const ${key} = makeRpc('${url}', '${key}');`);
   }
@@ -552,7 +556,7 @@ function context(checker, func) {
   }
   const ret = async (context2, ...rest) => {
     const ctx = await checker(context2);
-    return await func(ctx, ...rest);
+    return func(ctx, ...rest);
   };
   ret[_ctx] = true;
   return ret;
